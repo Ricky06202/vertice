@@ -9,11 +9,30 @@ import { leerPreferencias, guardarPreferencias } from "./preferencias";
 const BASE_PX = 18;
 
 export function aplicarZoom(): void {
-  const factor = leerPreferencias().textoPantalla;
+  let factor = leerPreferencias().textoPantalla;
+  if (typeof factor !== "number" || !Number.isFinite(factor)) factor = 1;
+  factor = Math.min(2.5, Math.max(0.75, factor));
   const root = document.documentElement;
-  root.style.setProperty("--vertice-zoom", String(factor));
+  root.style.removeProperty("--vertice-zoom");
   root.style.fontSize = `${BASE_PX * factor}px`;
   window.dispatchEvent(new Event("vertice-zoom"));
+}
+
+/**
+ * Botón de emergencia: devuelve el zoom de PÁGINA de WebKit (el que dejó el
+ * antiguo comando setZoom con valores sin dividir) a 1.0 y reescribe el CSS.
+ */
+export async function restablecerZoom(): Promise<void> {
+  guardarPreferencias({ textoPantalla: 1 });
+  try {
+    if ("__TAURI_INTERNALS__" in window) {
+      const { getCurrentWebview } = await import("@tauri-apps/api/webview");
+      await getCurrentWebview().setZoom(1);
+    }
+  } catch {
+    /* sin permiso/comando: el reset visual por CSS sigue sirviendo */
+  }
+  aplicarZoom();
 }
 
 export function fijarZoom(factor: number): void {

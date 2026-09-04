@@ -1,5 +1,5 @@
 import { useJobs } from "../state/JobsContext";
-import { fijarZoom } from "../state/zoom";
+import { fijarZoom, restablecerZoom } from "../state/zoom";
 import { leerPreferencias } from "../state/preferencias";
 import { useEffect, useState } from "react";
 import type { Modo } from "../App";
@@ -47,7 +47,7 @@ function Configuracion({ modo, onCambiarModo }: Props) {
   const [medido, setMedido] = useState("");
   useEffect(() => {
     function medir() {
-      setMedido(getComputedStyle(document.documentElement).fontSize);
+      setMedido(`inline ${document.documentElement.style.fontSize || "—"} → ${getComputedStyle(document.documentElement).fontSize}`);
       setZoom(leerPreferencias().textoPantalla);
     }
     medir();
@@ -174,8 +174,14 @@ function Configuracion({ modo, onCambiarModo }: Props) {
         <p className="text-base text-ink-soft" role="status">
           Preferido: <strong className="text-accent-strong">{Math.round(zoom * 100)} %</strong>
           {" · "}tamaño real del documento: <strong className="font-mono">{medido || "…"}</strong>
-          {" · "}Ctrl + “+”/“−” también cambia el tamaño. Si pulsar y nada cambia lo esperado y
-          lo real, repórtalo con este dato.
+          {" · "}Ctrl + “+”/“−” también cambia el tamaño.
+          <button
+            type="button"
+            className="ml-2 cursor-pointer rounded-lg border border-line bg-surface px-3 py-1 text-base font-semibold text-red-700 hover:bg-red-50"
+            onClick={() => void restablecerZoom()}
+          >
+            Restablecer zoom
+          </button>
         </p>
         <p className="text-base text-ink-soft" role="status">
           Ajustes como decimales o descripción viajan dentro del archivo del proyecto; el tamaño de pantalla y el modo (se aplica a este job); el

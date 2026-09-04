@@ -18,10 +18,10 @@
 }
 
 @layer base {
-  /* Texto grande por defecto: base 18px, multiplicada por el zoom de pantalla
-     (--vertice-zoom, ajustable en Configuración → "Tamaño de pantalla"). */
+  /* Base 18px. El zoom de pantalla aplica font-size inline sobre <html>
+     (fuente única de verdad; nada de calc/var que WebKit pueda malinterpretar). */
   html {
-    font-size: calc(18px * var(--vertice-zoom, 1));
+    font-size: 18px;
   }
 
   body {
