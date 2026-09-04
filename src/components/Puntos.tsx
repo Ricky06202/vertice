@@ -2,6 +2,7 @@ import { useMemo, useRef, useState } from "react";
 import { useJobs } from "../state/JobsContext";
 import type { Punto } from "../types";
 import { analizarCsv, type ResumenImportacion } from "../storage/importarCsv";
+import { exportarCsv } from "../storage/exportarCsv";
 import ImportarResult from "./ImportarResult";
 
 type Formulario = {
@@ -55,6 +56,23 @@ function Puntos() {
   const [reanudarDesde, setReanudarDesde] = useState("");
   const inputArchivo = useRef<HTMLInputElement>(null);
   const [resumen, setResumen] = useState<ResumenImportacion | null>(null);
+  const [avisoExport, setAvisoExport] = useState("");
+
+  async function exportar(usarRango: boolean) {
+    const lista =
+      usarRango && rango
+        ? puntos.filter((p) => {
+            const n = Number(p.numero);
+            return Number.isFinite(n) && n >= rango.de && n <= rango.hasta;
+          })
+        : puntos;
+    if (lista.length === 0) {
+      setAvisoExport(usarRango ? "El rango no contiene puntos exportables." : "No hay puntos que exportar.");
+      return;
+    }
+    const ruta = await exportarCsv(lista, config, estado.proyecto.titulo);
+    setAvisoExport(ruta ? `Exportados ${lista.length} puntos.` : "Exportación cancelada.");
+  }
 
   async function alElegirArchivo(e: React.ChangeEvent<HTMLInputElement>) {
     const archivo = e.target.files?.[0];
@@ -250,11 +268,26 @@ function Puntos() {
               Importar CSV
             </button>
           </div>
+          <div className="flex flex-wrap gap-2">
+            <button type="button" className="btn btn-secondary" onClick={() => void exportar(false)}>
+              Exportar CSV (todos)
+            </button>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              disabled={!rango}
+              title={rango ? `Exportar ${rango.de}–${rango.hasta}` : "Active primero un rango con «Listar rango»"}
+              onClick={() => void exportar(true)}
+            >
+              {rango ? `Exportar rango ${rango.de}–${rango.hasta}` : "Exportar rango"}
+            </button>
+          </div>
         </div>
         <p className="w-full text-base text-ink-soft" role="status">
           {puntos.length} punto{puntos.length === 1 ? "" : "s"} en el proyecto
           {rango && ` · listando rango ${rango.de}–${rango.hasta} (${visibles.length} resultado${visibles.length === 1 ? "" : "s"})`}
           {busqueda.trim() && ` · buscando «${busqueda.trim()}»`}
+          {avisoExport && <span className="font-semibold text-accent-strong"> · {avisoExport}</span>}
         </p>
       </section>
 
