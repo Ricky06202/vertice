@@ -53,7 +53,14 @@ export type Config = {
    * permitidos por §6 regla 1 de docs/formato.md). Lo fija «Retomar numeración».
    */
   numeroSiguiente?: number;
+  /**
+   * Separador de campos al exportar CSV (opcional). Sin valor = "auto":
+   * coma decimal fuerza ";" en el CSV, punto decimal usa ",".
+   */
+  separadorExport?: SeparadorExport;
 };
+
+export type SeparadorExport = "," | ";";
 
 /** Un trabajo = un archivo `.vertice` con este objeto serializado (UTF-8, sin BOM). */
 export type Proyecto = {

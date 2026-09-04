@@ -75,6 +75,7 @@ números son enteros; si no, conserva el orden de inserción (orden en el array)
 | `separador` | `"."` o `","` | `","` | Separador decimal **en pantalla**; el archivo siempre usa punto. |
 | `descDefault` | string | `""` | Descripción autocompletada en captura manual (campo de trabajo repetitivo). |
 | `numeroSiguiente` | entero ≥ 0 | No | Clave **opcional**: número para la próxima captura ("Retomar numeración"). Su ausencia = deducir máximo+1. Cambios así no suben `version` (§6 regla 1). |
+| `separadorExport` | `","` o `";"` | No | Clave **opcional**: separador de campos al exportar CSV. Ausente = "auto" (si el decimal es coma se usa `;` para que Excel no rompa los números). |
 
 ## 6. Versionado y migración
 

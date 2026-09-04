@@ -39,6 +39,12 @@ export function validarProyecto(datos: unknown): Proyecto | null {
   if (!numeroFinito(c.decimalesNE) || !numeroFinito(c.decimalesElev)) return null;
   if (c.numeroSiguiente !== undefined && !numeroFinito(c.numeroSiguiente)) return null;
   if (
+    c.separadorExport !== undefined &&
+    c.separadorExport !== "," &&
+    c.separadorExport !== ";"
+  )
+    return null;
+  if (
     datos.puntoActual !== undefined &&
     datos.puntoActual !== null &&
     typeof datos.puntoActual !== "string"

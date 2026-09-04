@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Header from "./components/Header";
 import TabBar from "./components/TabBar";
 import LogPanel from "./components/LogPanel";
@@ -6,8 +6,10 @@ import Placeholder from "./components/Placeholder";
 import Inicio from "./components/Inicio";
 import Puntos from "./components/Puntos";
 import Calculo from "./components/Calculo";
+import Configuracion from "./components/Configuracion";
 import Informes from "./components/Informes";
 import { JobsProvider } from "./state/JobsContext";
+import { guardarPreferencias, leerPreferencias } from "./state/preferencias";
 
 export type Modo = "simple" | "avanzado";
 
@@ -24,12 +26,7 @@ const TABS = [
 
 export type TabId = (typeof TABS)[number]["id"];
 
-const PLACEHOLDERS: Record<Exclude<TabId, "inicio" | "puntos" | "calculo" | "informes">, { titulo: string; texto: string; glyph: string }> = {
-  configuracion: {
-    titulo: "Configuración",
-    texto: "Decimales, separador decimal, aspecto y preferencias de guardado.",
-    glyph: "⚙",
-  },
+const PLACEHOLDERS: Record<Exclude<TabId, "inicio" | "puntos" | "calculo" | "informes" | "configuracion">, { titulo: string; texto: string; glyph: string }> = {
   estaciones: {
     titulo: "Estaciones",
     texto: "Códigos TR/IN/GT y avance de poligonal de campo.",
@@ -47,30 +44,15 @@ const PLACEHOLDERS: Record<Exclude<TabId, "inicio" | "puntos" | "calculo" | "inf
   },
 };
 
-function leerModo(): Modo {
-  try {
-    const v = localStorage.getItem("vertice.modo");
-    return v === "avanzado" ? "avanzado" : "simple";
-  } catch {
-    return "simple";
-  }
-}
-
 function App() {
-  const [modo, setModo] = useState<Modo>(leerModo);
+  const [modo, setModo] = useState<Modo>(() => leerPreferencias().modoDefecto);
   const [tab, setTab] = useState<TabId>("inicio");
   const [registroAbierto, setRegistroAbierto] = useState(false);
 
-  useEffect(() => {
-    try {
-      localStorage.setItem("vertice.modo", modo);
-    } catch {
-      /* sin persistencia disponible */
-    }
-  }, [modo]);
-
   function cambiarModo(nuevo: Modo) {
     setModo(nuevo);
+    // el último modo elegido del header también fija el de apertura
+    guardarPreferencias({ modoDefecto: nuevo });
     if (nuevo === "simple") {
       const tabActual = TABS.find((t) => t.id === tab);
       if (tabActual?.fase2) setTab("inicio");
@@ -101,6 +83,8 @@ function App() {
               <Calculo modo={modo} />
             ) : tab === "informes" ? (
               <Informes />
+            ) : tab === "configuracion" ? (
+              <Configuracion modo={modo} onCambiarModo={cambiarModo} />
             ) : (
               <Placeholder
                 {...PLACEHOLDERS[tab]}

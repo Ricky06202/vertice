@@ -8,11 +8,14 @@ import type { Config, Punto } from "../types";
 import { esTauri } from "./verticeFs";
 
 /**
- * Con decimales en coma el separador de campos debe ser ";" para que Excel no
- * parta "1234,56". Con punto decimal se usa la coma.
- * TODO: separador explícito del usuario cuando exista la pestaña de ajustes finos.
+ * Elegible por el usuario en Configuración; si es automático y los decimales
+ * van con coma se fuerza ";" para que Excel no parta "1234,56".
+ * (Ya no hace falta TODO: la opción existe desde la pestaña Configuración.)
  */
 export function separadorDeCampos(config: Config): string {
+  if (config.separadorExport === "," || config.separadorExport === ";") {
+    return config.separadorExport;
+  }
   return config.separador === "," ? ";" : ",";
 }
 
