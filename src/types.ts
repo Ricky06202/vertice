@@ -64,6 +64,8 @@ export type Proyecto = {
   puntos: Punto[];
   log: LogEntry[];
   config: Config;
+  /** Punto actual (GT). Clave opcional/aditiva; null = ninguno. */
+  puntoActual?: string | null;
 };
 
 export function createEmptyProject(titulo = "Sin proyecto"): Proyecto {

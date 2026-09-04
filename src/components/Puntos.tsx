@@ -1,6 +1,7 @@
 import { useMemo, useRef, useState } from "react";
 import { useJobs } from "../state/JobsContext";
 import type { Punto } from "../types";
+import { punteroTras, siguienteNumero } from "../lib/puntos";
 import { analizarCsv, type ResumenImportacion } from "../storage/importarCsv";
 import { exportarCsv } from "../storage/exportarCsv";
 import ImportarResult from "./ImportarResult";
@@ -31,15 +32,6 @@ function esEnteroPosible(texto: string): number | null {
 
 function formatea(v: number, dec: number, sep: string): string {
   return v.toFixed(dec).replace(".", sep);
-}
-
-function siguienteNumeroDe(puntos: Punto[], puntado?: number): string {
-  if (puntado !== undefined && Number.isInteger(puntado) && puntado >= 0) return String(puntado);
-  const max = puntos.reduce((acc, p) => {
-    const n = Number(p.numero);
-    return Number.isFinite(n) ? Math.max(acc, n) : acc;
-  }, 0);
-  return String(max + 1);
 }
 
 function Puntos() {
@@ -123,7 +115,7 @@ function Puntos() {
     setErrores({});
     setForm({
       ...FORM_VACIO,
-      numero: siguienteNumeroDe(puntos, config.numeroSiguiente),
+      numero: siguienteNumero(puntos, config),
       descripcion: config.descDefault,
     });
   }
@@ -155,11 +147,7 @@ function Puntos() {
       ? puntos.map((p) => (p.numero === editando ? nuevo : p))
       : [...puntos, nuevo];
     // Si hay puntero de numeración, avanza tras cualquier captura manual nueva.
-    const configExtra =
-      !editando && config.numeroSiguiente !== undefined
-        ? { numeroSiguiente: (Number(nuevo.numero) || config.numeroSiguiente + 1) + 1 }
-        : undefined;
-    escribirProyecto(con, configExtra);
+    escribirProyecto(con, !editando ? punteroTras(nuevo.numero, config) : undefined);
     comenzarNuevo();
   }
 

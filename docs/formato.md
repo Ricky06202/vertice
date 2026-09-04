@@ -35,6 +35,7 @@
 | `puntos` | array de `Punto` (§3) | **Sí** | Puede estar vacío. |
 | `log` | array de `LogEntry` (§4) | **Sí** | Puede estar vacío. Orden cronológico (más antiguo primero). |
 | `config` | objeto `Config` (§5) | **Sí** | Preferencias que viajan con el proyecto. |
+| `puntoActual` | string \| null | No | Clave **opcional** (GT): número del punto actual; null = ninguno. Aditiva, no sube versión. |
 
 ## 3. `Punto`
 

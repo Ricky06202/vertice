@@ -38,6 +38,12 @@ export function validarProyecto(datos: unknown): Proyecto | null {
   if (!sepOk || typeof c.descDefault !== "string") return null;
   if (!numeroFinito(c.decimalesNE) || !numeroFinito(c.decimalesElev)) return null;
   if (c.numeroSiguiente !== undefined && !numeroFinito(c.numeroSiguiente)) return null;
+  if (
+    datos.puntoActual !== undefined &&
+    datos.puntoActual !== null &&
+    typeof datos.puntoActual !== "string"
+  )
+    return null;
 
   return datos as unknown as Proyecto;
 }

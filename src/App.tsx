@@ -5,6 +5,7 @@ import LogPanel from "./components/LogPanel";
 import Placeholder from "./components/Placeholder";
 import Inicio from "./components/Inicio";
 import Puntos from "./components/Puntos";
+import Calculo from "./components/Calculo";
 import { JobsProvider } from "./state/JobsContext";
 
 export type Modo = "simple" | "avanzado";
@@ -22,12 +23,7 @@ const TABS = [
 
 export type TabId = (typeof TABS)[number]["id"];
 
-const PLACEHOLDERS: Record<Exclude<TabId, "inicio" | "puntos">, { titulo: string; texto: string; glyph: string }> = {
-  calculo: {
-    titulo: "Cálculo",
-    texto: "Áreas de poligonal, inversos y utilidades de cálculo del proyecto.",
-    glyph: "∠",
-  },
+const PLACEHOLDERS: Record<Exclude<TabId, "inicio" | "puntos" | "calculo">, { titulo: string; texto: string; glyph: string }> = {
   informes: {
     titulo: "Informes",
     texto: "Listado de coordenadas, informe de texto y opciones de impresión.",
@@ -102,6 +98,8 @@ function App() {
               <Inicio />
             ) : tab === "puntos" ? (
               <Puntos />
+            ) : tab === "calculo" ? (
+              <Calculo modo={modo} />
             ) : (
               <Placeholder
                 {...PLACEHOLDERS[tab]}
