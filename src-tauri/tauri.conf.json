@@ -34,7 +34,7 @@
     "longDescription": "Vértice: registro de puntos, TR/IN/GT, áreas de poligonal e informes, en un solo archivo .vertice. 100% offline, GPL-3.0-or-later.",
     "fileAssociations": [
       {
-        "extensions": ["vertice"],
+        "ext": ["vertice"],
         "mimeType": "application/vertice",
         "description": "Proyecto Vértice",
         "role": "Viewer"

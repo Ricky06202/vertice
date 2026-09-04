@@ -1,4 +1,7 @@
 import { useJobs } from "../state/JobsContext";
+import { fijarZoom } from "../state/zoom";
+import { leerPreferencias } from "../state/preferencias";
+import { useState } from "react";
 import type { Modo } from "../App";
 import type { Config, SeparadorExport } from "../types";
 
@@ -40,6 +43,7 @@ function Selector<O extends string | number>({
 function Configuracion({ modo, onCambiarModo }: Props) {
   const { estado, actualizarProyecto } = useJobs();
   const { config } = estado.proyecto;
+  const [zoom, setZoom] = useState(leerPreferencias().textoPantalla);
 
   function setConfig(parche: Partial<Config>) {
     actualizarProyecto({ ...estado.proyecto, config: { ...config, ...parche } });
@@ -136,8 +140,25 @@ function Configuracion({ modo, onCambiarModo }: Props) {
             ]}
           />
         </div>
+        <div className={FILA}>
+          <div>
+            <p className="text-lg font-semibold">Tamaño de pantalla</p>
+            <p className="text-base text-ink-soft">
+              Agranda o achica toda la interfaz. En pantallas 4K donde el sistema
+              no aplica el escalado, suba a 150–200 %. Se recuerda en este equipo.
+            </p>
+          </div>
+          <Selector
+            valor={Math.round(zoom * 100)}
+            onChange={(v) => {
+              setZoom(v / 100);
+              void fijarZoom(v / 100);
+            }}
+            opciones={[100, 125, 150, 175, 200].map((n) => ({ v: n, l: `${n} %` }))}
+          />
+        </div>
         <p className="text-base text-ink-soft" role="status">
-          Lo que ajuste aquí viaja dentro del archivo del proyecto (se aplica a este job); el
+          Ajustes como decimales o descripción viajan dentro del archivo del proyecto; el tamaño de pantalla y el modo (se aplica a este job); el
           modo por defecto queda guardado en este equipo.
         </p>
       </section>
