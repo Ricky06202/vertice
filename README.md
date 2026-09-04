@@ -11,7 +11,8 @@ con autoguardado y copia `.bak`.
 ## Estado
 
 **MVP en desarrollo.** Requisitos definidos en [`docs/01-requisitos.md`](docs/01-requisitos.md).
-Formato de archivo en `docs/formato.md` (pendiente de documentar).
+Formato de archivo en [`docs/formato.md`](docs/formato.md) e instalación/desarrollo en
+[`docs/instalacion.md`](docs/instalacion.md).
 
 Stack previsto: Tauri v2 + React + TypeScript + Vite + Tailwind CSS (bun).
 
