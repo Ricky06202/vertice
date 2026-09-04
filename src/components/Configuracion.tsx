@@ -158,6 +158,12 @@ function Configuracion({ modo, onCambiarModo }: Props) {
           />
         </div>
         <p className="text-base text-ink-soft" role="status">
+          Tamaño vigente ahora mismo:{" "}
+          <strong className="text-accent-strong">{Math.round(zoom * 100)} %</strong> — si el
+          texto de esta ventana no cambió al pulsar, reinicie Vértice (detener y volver a
+          lanzar <code className="font-mono">bun run tauri dev</code>).
+        </p>
+        <p className="text-base text-ink-soft" role="status">
           Ajustes como decimales o descripción viajan dentro del archivo del proyecto; el tamaño de pantalla y el modo (se aplica a este job); el
           modo por defecto queda guardado en este equipo.
         </p>

@@ -60,7 +60,8 @@
     margin: 14mm;
   }
   html {
-    font-size: 14px; /* el papel no necesita el tamaño grande de pantalla */
+    /* !important anula el zoom inline de pantalla: el papel siempre sale normal */
+    font-size: 14px !important;
   }
   body {
     background: #ffffff;
