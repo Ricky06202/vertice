@@ -4,6 +4,7 @@ import TabBar from "./components/TabBar";
 import LogPanel from "./components/LogPanel";
 import Placeholder from "./components/Placeholder";
 import Inicio from "./components/Inicio";
+import Puntos from "./components/Puntos";
 import { JobsProvider } from "./state/JobsContext";
 
 export type Modo = "simple" | "avanzado";
@@ -21,12 +22,7 @@ const TABS = [
 
 export type TabId = (typeof TABS)[number]["id"];
 
-const PLACEHOLDERS: Record<Exclude<TabId, "inicio">, { titulo: string; texto: string; glyph: string }> = {
-  puntos: {
-    titulo: "Puntos",
-    texto: "La lista de puntos con número, descripción, Norte, Este y elevación.",
-    glyph: "·×·",
-  },
+const PLACEHOLDERS: Record<Exclude<TabId, "inicio" | "puntos">, { titulo: string; texto: string; glyph: string }> = {
   calculo: {
     titulo: "Cálculo",
     texto: "Áreas de poligonal, inversos y utilidades de cálculo del proyecto.",
@@ -104,6 +100,8 @@ function App() {
           <div className="mx-auto max-w-5xl">
             {tab === "inicio" ? (
               <Inicio />
+            ) : tab === "puntos" ? (
+              <Puntos />
             ) : (
               <Placeholder
                 {...PLACEHOLDERS[tab]}

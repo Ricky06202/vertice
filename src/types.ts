@@ -48,6 +48,11 @@ export type Config = {
   separador: SeparadorDecimal;
   /** Descripción que se autocompleta en el formulario de captura. */
   descDefault: string;
+  /**
+   * Número a usar en la próxima captura manual (opcional; cambios aditivos
+   * permitidos por §6 regla 1 de docs/formato.md). Lo fija «Retomar numeración».
+   */
+  numeroSiguiente?: number;
 };
 
 /** Un trabajo = un archivo `.vertice` con este objeto serializado (UTF-8, sin BOM). */

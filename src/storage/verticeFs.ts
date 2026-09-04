@@ -37,6 +37,7 @@ export function validarProyecto(datos: unknown): Proyecto | null {
   const sepOk = c.separador === "," || c.separador === ".";
   if (!sepOk || typeof c.descDefault !== "string") return null;
   if (!numeroFinito(c.decimalesNE) || !numeroFinito(c.decimalesElev)) return null;
+  if (c.numeroSiguiente !== undefined && !numeroFinito(c.numeroSiguiente)) return null;
 
   return datos as unknown as Proyecto;
 }

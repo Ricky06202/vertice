@@ -73,6 +73,7 @@ números son enteros; si no, conserva el orden de inserción (orden en el array)
 | `decimalesElev` | entero ≥ 0 | 3 | Decimales mostrados de elevación/Δelev. |
 | `separador` | `"."` o `","` | `","` | Separador decimal **en pantalla**; el archivo siempre usa punto. |
 | `descDefault` | string | `""` | Descripción autocompletada en captura manual (campo de trabajo repetitivo). |
+| `numeroSiguiente` | entero ≥ 0 | No | Clave **opcional**: número para la próxima captura ("Retomar numeración"). Su ausencia = deducir máximo+1. Cambios así no suben `version` (§6 regla 1). |
 
 ## 6. Versionado y migración
 
