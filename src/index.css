@@ -1,0 +1,54 @@
+@import "tailwindcss";
+
+/* ===== Tema Vértice (Tailwind v4) ===== */
+@theme {
+  --font-sans: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+
+  /* Neutros cálidos */
+  --color-canvas: #f6f4f1;
+  --color-surface: #fffdfb;
+  --color-line: #e7e2dc;
+  --color-ink: #26221e;
+  --color-ink-soft: #6f665d;
+
+  /* Acento: verde profundo */
+  --color-accent: #0d7d6b;
+  --color-accent-strong: #0a5f52;
+  --color-accent-soft: #e3f2ee;
+}
+
+@layer base {
+  /* Texto grande por defecto: 1 rem = 18px → text-base ≈ 18px, text-lg ≈ 20px */
+  html {
+    font-size: 18px;
+  }
+
+  body {
+    @apply bg-canvas font-sans text-ink antialiased;
+  }
+
+  /* Focus-visible accesible y bien visible */
+  :focus-visible {
+    outline: 3px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  .card {
+    @apply rounded-xl border border-line bg-surface p-6 shadow-sm;
+  }
+
+  /* Botones grandes y táctiles (mín. 48px de alto) */
+  .btn {
+    @apply inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-xl px-6 text-lg font-semibold transition-colors;
+  }
+
+  .btn-primary {
+    @apply bg-accent text-white hover:bg-accent-strong active:bg-accent-strong;
+  }
+
+  .btn-secondary {
+    @apply border border-line bg-surface text-ink hover:bg-accent-soft;
+  }
+}
