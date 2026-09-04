@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import type { Modo } from "../App";
 import { useJobs } from "../state/JobsContext";
 import type { LogTipo, Punto } from "../types";
@@ -36,12 +36,14 @@ function SelectorPunto({
   onChange,
   puntos,
   permitVacio = false,
+  actual = null,
 }: {
   etiqueta: string;
   valor: string;
   onChange: (v: string) => void;
   puntos: Punto[];
   permitVacio?: boolean;
+  actual?: string | null;
 }) {
   return (
     <label className="grid flex-1 gap-1.5">
@@ -56,6 +58,7 @@ function SelectorPunto({
           <option key={p.numero} value={p.numero}>
             {p.numero}
             {p.descripcion ? ` — ${p.descripcion}` : ""}
+            {p.numero === actual ? " · punto actual" : ""}
           </option>
         ))}
       </select>
@@ -169,6 +172,16 @@ function Calculo({ modo }: Props) {
   const [inErr, setInErr] = useState("");
   const [inRes, setInRes] = useState<string | null>(null);
   const [lineaIn, setLineaIn] = useState("");
+
+  // Sincroniza los selectores con el punto actual (GT): al fijarlo a mano o al
+  // avanzar una estación, base e "Punto A" siguen al GT automáticamente.
+  useEffect(() => {
+    setGtSel(estado.proyecto.puntoActual ?? "");
+    if (gt?.numero) {
+      setBase(gt.numero);
+      setPuntoA(gt.numero);
+    }
+  }, [gt?.numero, estado.proyecto.puntoActual]);
 
   function calcularIn(a: string, b: string, registrarEnLog: boolean) {
     const pa = buscarPunto(puntos, a);
@@ -296,7 +309,7 @@ function Calculo({ modo }: Props) {
             </label>
           )}
           <div className="flex flex-wrap items-end gap-3">
-            <SelectorPunto etiqueta="Punto A" valor={puntoA} onChange={setPuntoA} puntos={puntos} />
+            <SelectorPunto etiqueta="Punto A" valor={puntoA} onChange={setPuntoA} puntos={puntos} actual={estado.proyecto.puntoActual} />
             <SelectorPunto etiqueta="Punto B" valor={puntoB} onChange={setPuntoB} puntos={puntos} permitVacio />
             <button type="button" className="btn btn-primary" onClick={() => calcularIn(puntoA, puntoB, true)}>
               Calcular
@@ -342,7 +355,7 @@ function Calculo({ modo }: Props) {
             </label>
           )}
           <div className="grid gap-3 sm:grid-cols-2">
-            <SelectorPunto etiqueta="Punto base" valor={base} onChange={setBase} puntos={puntos} />
+            <SelectorPunto etiqueta="Punto base (suele ser el punto actual)" valor={base} onChange={setBase} puntos={puntos} actual={estado.proyecto.puntoActual} />
             <label className="grid gap-1.5">
               <span className="text-base font-semibold">Rumbo (acepta 30.04SE, S30°04'E…)</span>
               <input type="text" value={rumbo} onChange={(e) => setRumbo(e.target.value)} placeholder="30.04SE" className={entrada} />
