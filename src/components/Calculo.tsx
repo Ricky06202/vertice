@@ -307,16 +307,19 @@ function Calculo({ modo }: Props) {
         </section>
 
         {/* ------ TR ------ */}
-        <section className="card grid h-fit gap-3" aria-label="Estación por rumbo (TR)">
+        <section className="card grid h-fit gap-3" aria-label="Nuevo punto por rumbo (TR)">
           <h3 className="text-xl font-bold">
-            Estación nueva por rumbo{" "}
+            Nuevo punto a partir de otro{" "}
             {modo === "avanzado" && (
               <code className="rounded-md bg-canvas px-2 py-0.5 text-base font-mono text-accent-strong">TR</code>
             )}
           </h3>
           <p className="text-base text-ink-soft">
-            Desde el punto base, avance con rumbo (p. ej. «30.04SE») y distancia. El nuevo
-            punto toma el número siguiente y pasa a ser el punto actual.
+            Es el avance típico de campo: desde un punto conocido (por defecto el punto
+            actual) se anota la dirección medida —en cualquier formato: «30.04SE»,
+            «S 30°04' E»— y la distancia horizontal. Vértice calcula las coordenadas del
+            siguiente punto, le da número y lo convierte en el punto actual. La ΔElevación
+            es opcional: el desnivel respecto a la base (por ejemplo +2,50 si sube).
           </p>
           {modo === "avanzado" && (
             <label className="grid gap-1.5">

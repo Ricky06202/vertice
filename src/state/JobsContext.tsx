@@ -17,6 +17,7 @@ import {
   leerProyecto,
   nombreArchivo,
   rutaBak,
+  validarProyecto,
 } from "../storage/verticeFs";
 
 export type Estado = {
@@ -35,7 +36,8 @@ type Accion =
   | { t: "proyecto"; proyecto: Proyecto }
   | { t: "ruta"; ruta: string }
   | { t: "guardando" }
-  | { t: "guardado"; ts: string };
+  | { t: "guardado"; ts: string }
+  | { t: "guardado-como"; proyecto: Proyecto; ruta: string; ts: string };
 
 function reductor(estado: Estado, accion: Accion): Estado {
   switch (accion.t) {
@@ -57,12 +59,41 @@ function reductor(estado: Estado, accion: Accion): Estado {
       return { ...estado, guardando: true };
     case "guardado":
       return { ...estado, guardando: false, sucio: false, ultimoGuardado: accion.ts };
+    case "guardado-como":
+      return {
+        ...estado,
+        proyecto: accion.proyecto,
+        ruta: accion.ruta,
+        guardando: false,
+        sucio: false,
+        ultimoGuardado: accion.ts,
+      };
   }
 }
 
 export type Reciente = { ruta: string; titulo: string; ts: string };
 
 const CLAVE_RECIENTES = "vertice.recientes";
+const CLAVE_BORRADOR = "vertice.borrador.v1";
+
+/**
+ * Borrador en localStorage: protege el trabajo sin ruta contra recargas
+ * (HMR de desarrollo, cierres bruscos). Si el borrador tenia archivo, se
+ * marca sucio para que el autoguardado rescriba lo pendiente.
+ */
+function estadoDesdeBorrador(fallback: Estado): Estado {
+  try {
+    const crudo = localStorage.getItem(CLAVE_BORRADOR);
+    if (!crudo) return fallback;
+    const o = JSON.parse(crudo);
+    const proyecto = validarProyecto(o?.proyecto);
+    if (!proyecto) return fallback;
+    const ruta = typeof o?.ruta === "string" ? o.ruta : null;
+    return { proyecto, ruta, sucio: ruta !== null, guardando: false, ultimoGuardado: null };
+  } catch {
+    return fallback;
+  }
+}
 const MAX_RECIENTES = 10;
 const DEBOUNCE_AUTOSAVE_MS = 400;
 
@@ -114,8 +145,10 @@ export function JobsProvider({ children }: { children: ReactNode }) {
     }),
     [],
   );
-  const [estado, dispatch] = useReducer(reductor, estadoInicial);
+  const [estado, dispatch] = useReducer(reductor, estadoInicial, estadoDesdeBorrador);
   const [recientes, setRecientes] = useState<Reciente[]>(leerRecientes);
+  const [nuevoModal, setNuevoModal] = useState(false);
+  const [nombreNuevo, setNombreNuevo] = useState("");
 
   const registrarReciente = useCallback((ruta: string, titulo: string, ts = new Date().toISOString()) => {
     setRecientes((prev) => {
@@ -165,8 +198,15 @@ export function JobsProvider({ children }: { children: ReactNode }) {
 
   const nuevo = useCallback(async () => {
     if (!(await confirmar(estado.sucio))) return;
-    dispatch({ t: "nuevo", proyecto: createEmptyProject() });
+    setNombreNuevo("");
+    setNuevoModal(true);
   }, [estado.sucio]);
+
+  function crearNuevo() {
+    const titulo = nombreNuevo.trim() || "Nuevo proyecto";
+    dispatch({ t: "nuevo", proyecto: createEmptyProject(titulo) });
+    setNuevoModal(false);
+  }
 
   const abrir = useCallback(async () => {
     if (!(await confirmar(estado.sucio))) return;
@@ -212,12 +252,17 @@ export function JobsProvider({ children }: { children: ReactNode }) {
     });
     if (typeof elegida !== "string") return;
     const ruta = elegida.endsWith(".vertice") ? elegida : `${elegida}.vertice`;
+    // Si el titulo sigue siendo el generico, heredelo del nombre de archivo.
+    const actual = estado.proyecto.titulo.trim();
+    const nombre = (ruta.split(/[\\/]/).pop() ?? "").replace(/\.vertice$/i, "");
+    const tituloFinal = actual === "" || actual === "Sin proyecto" ? nombre || actual : actual;
+    const proyecto = { ...estado.proyecto, titulo: tituloFinal };
     dispatch({ t: "ruta", ruta });
     dispatch({ t: "guardando" });
     try {
-      await escribirProyecto(ruta, estado.proyecto);
-      dispatch({ t: "guardado", ts: new Date().toISOString() });
-      registrarReciente(ruta, estado.proyecto.titulo);
+      await escribirProyecto(ruta, proyecto);
+      dispatch({ t: "guardado-como", proyecto, ruta, ts: new Date().toISOString() });
+      registrarReciente(ruta, tituloFinal);
     } catch (e) {
       if (esTauri()) {
         await message(`No se pudo guardar: ${String(e)}`, { title: "Error", kind: "error" });
@@ -234,12 +279,68 @@ export function JobsProvider({ children }: { children: ReactNode }) {
     return () => clearTimeout(id);
   }, [estado.sucio, estado.ruta, estado.guardando, estado.proyecto, guardar]);
 
+  // Persiste el borrador en cada cambio (barato; el JSON de un job es pequeno).
+  useEffect(() => {
+    try {
+      localStorage.setItem(CLAVE_BORRADOR, JSON.stringify({ ruta: estado.ruta, proyecto: estado.proyecto }));
+    } catch {
+      /* sin persistencia disponible */
+    }
+  }, [estado.proyecto, estado.ruta]);
+
   const value = useMemo<ValorContexto>(
     () => ({ estado, recientes, nuevo, abrir, abrirRuta, guardar, guardarComo, actualizarProyecto: (p) => dispatch({ t: "proyecto", proyecto: p }) }),
     [estado, recientes, nuevo, abrir, abrirRuta, guardar, guardarComo],
   );
 
-  return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
+  return (
+    <Ctx.Provider value={value}>
+      {children}
+
+      {nuevoModal && (
+        <div
+          className="fixed inset-0 z-50 grid place-items-center bg-ink/30 p-6"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Nuevo proyecto"
+          onClick={() => setNuevoModal(false)}
+        >
+          <div className="card grid w-full max-w-md gap-5" onClick={(ev) => ev.stopPropagation()}>
+            <div className="grid gap-1">
+              <h2 className="text-2xl font-extrabold">Nuevo proyecto</h2>
+              <p className="text-lg text-ink-soft">
+                Ponga un nombre para identificar el trabajo (p. ej. "Lote Los Cedros").
+                El archivo se crea al Guardar o Guardar como.
+              </p>
+            </div>
+            <label className="grid gap-2 text-base font-semibold">
+              Nombre del proyecto
+              <input
+                autoFocus
+                type="text"
+                value={nombreNuevo}
+                onChange={(ev) => setNombreNuevo(ev.target.value)}
+                onKeyDown={(ev) => {
+                  if (ev.key === "Enter") crearNuevo();
+                  if (ev.key === "Escape") setNuevoModal(false);
+                }}
+                placeholder="Nuevo proyecto"
+                className="min-h-12 rounded-xl border border-line bg-canvas px-4 text-lg font-normal"
+              />
+            </label>
+            <div className="flex justify-end gap-3">
+              <button type="button" className="btn btn-secondary" onClick={() => setNuevoModal(false)}>
+                Cancelar
+              </button>
+              <button type="button" className="btn btn-primary" onClick={crearNuevo}>
+                Crear proyecto
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </Ctx.Provider>
+  );
 }
 
 export function useJobs(): ValorContexto {
