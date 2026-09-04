@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Header from "./components/Header";
 import TabBar from "./components/TabBar";
 import LogPanel from "./components/LogPanel";
@@ -9,6 +9,7 @@ import Calculo from "./components/Calculo";
 import Configuracion from "./components/Configuracion";
 import Informes from "./components/Informes";
 import { JobsProvider } from "./state/JobsContext";
+import { aplicarZoom, fijarZoom } from "./state/zoom";
 import { guardarPreferencias, leerPreferencias } from "./state/preferencias";
 
 export type Modo = "simple" | "avanzado";
@@ -48,6 +49,25 @@ function App() {
   const [modo, setModo] = useState<Modo>(() => leerPreferencias().modoDefecto);
   const [tab, setTab] = useState<TabId>("inicio");
   const [registroAbierto, setRegistroAbierto] = useState(false);
+
+  // Ctrl/Cmd + “+” / “−”: ajustar tamaño de pantalla desde cualquier pestaña
+  useEffect(() => {
+    function alPulsar(e: KeyboardEvent) {
+      if (!(e.ctrlKey || e.metaKey)) return;
+      const paso = e.key === "-" ? -0.25 : 0.25;
+      if (e.key !== "-" && e.key !== "+" && e.key !== "=") return;
+      e.preventDefault();
+      const t = Math.min(2.5, Math.max(0.75, leerPreferencias().textoPantalla + paso));
+      fijarZoom(t);
+      aplicarZoom();
+    }
+    window.addEventListener("keydown", alPulsar);
+    return () => window.removeEventListener("keydown", alPulsar);
+  }, []);
+
+  useEffect(() => {
+    aplicarZoom();
+  }, []);
 
   function cambiarModo(nuevo: Modo) {
     setModo(nuevo);

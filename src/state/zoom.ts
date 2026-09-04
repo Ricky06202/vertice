@@ -13,6 +13,7 @@ export function aplicarZoom(): void {
   const root = document.documentElement;
   root.style.setProperty("--vertice-zoom", String(factor));
   root.style.fontSize = `${BASE_PX * factor}px`;
+  window.dispatchEvent(new Event("vertice-zoom"));
 }
 
 export function fijarZoom(factor: number): void {

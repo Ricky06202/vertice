@@ -1,7 +1,7 @@
 import { useJobs } from "../state/JobsContext";
 import { fijarZoom } from "../state/zoom";
 import { leerPreferencias } from "../state/preferencias";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { Modo } from "../App";
 import type { Config, SeparadorExport } from "../types";
 
@@ -44,6 +44,20 @@ function Configuracion({ modo, onCambiarModo }: Props) {
   const { estado, actualizarProyecto } = useJobs();
   const { config } = estado.proyecto;
   const [zoom, setZoom] = useState(leerPreferencias().textoPantalla);
+  const [medido, setMedido] = useState("");
+  useEffect(() => {
+    function medir() {
+      setMedido(getComputedStyle(document.documentElement).fontSize);
+      setZoom(leerPreferencias().textoPantalla);
+    }
+    medir();
+    const id = setTimeout(medir, 400);
+    window.addEventListener("vertice-zoom", medir);
+    return () => {
+      clearTimeout(id);
+      window.removeEventListener("vertice-zoom", medir);
+    };
+  }, [zoom]);
 
   function setConfig(parche: Partial<Config>) {
     actualizarProyecto({ ...estado.proyecto, config: { ...config, ...parche } });
@@ -158,10 +172,10 @@ function Configuracion({ modo, onCambiarModo }: Props) {
           />
         </div>
         <p className="text-base text-ink-soft" role="status">
-          Tamaño vigente ahora mismo:{" "}
-          <strong className="text-accent-strong">{Math.round(zoom * 100)} %</strong> — si el
-          texto de esta ventana no cambió al pulsar, reinicie Vértice (detener y volver a
-          lanzar <code className="font-mono">bun run tauri dev</code>).
+          Preferido: <strong className="text-accent-strong">{Math.round(zoom * 100)} %</strong>
+          {" · "}tamaño real del documento: <strong className="font-mono">{medido || "…"}</strong>
+          {" · "}Ctrl + “+”/“−” también cambia el tamaño. Si pulsar y nada cambia lo esperado y
+          lo real, repórtalo con este dato.
         </p>
         <p className="text-base text-ink-soft" role="status">
           Ajustes como decimales o descripción viajan dentro del archivo del proyecto; el tamaño de pantalla y el modo (se aplica a este job); el
