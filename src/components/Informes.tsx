@@ -3,6 +3,8 @@ import { useJobs } from "../state/JobsContext";
 import { buscarPunto } from "../lib/puntos";
 import { exportarInformeTxt, fechaInforme } from "../storage/informes";
 import { fechaHora } from "../storage/registro";
+import { aplicarZoom } from "../state/zoom";
+import { guardarPreferencias, leerPreferencias } from "../state/preferencias";
 
 type Alcance = "todos" | "rango";
 
@@ -97,7 +99,19 @@ function Informes() {
             type="button"
             className="btn btn-secondary"
             disabled={listado.length === 0}
-            onClick={() => window.print()}
+            onClick={() => {
+              // el zoom nativo del webview también entraría en el papel:
+              // imprimimos a 100 % y restauramos seguido
+              const previo = leerPreferencias().textoPantalla;
+              guardarPreferencias({ textoPantalla: 1 });
+              void aplicarZoom().then(() => {
+                window.print();
+                setTimeout(() => {
+                  guardarPreferencias({ textoPantalla: previo });
+                  void aplicarZoom();
+                }, 1500);
+              });
+            }}
           >
             Imprimir
           </button>

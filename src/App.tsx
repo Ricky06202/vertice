@@ -58,14 +58,14 @@ function App() {
       if (e.key !== "-" && e.key !== "+" && e.key !== "=") return;
       e.preventDefault();
       const t = Math.min(2.5, Math.max(0.75, leerPreferencias().textoPantalla + paso));
-      fijarZoom(t);
+      void fijarZoom(t);
     }
     window.addEventListener("keydown", alPulsar);
     return () => window.removeEventListener("keydown", alPulsar);
   }, []);
 
   useEffect(() => {
-    aplicarZoom();
+    void aplicarZoom();
   }, []);
 
   function cambiarModo(nuevo: Modo) {

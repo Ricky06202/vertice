@@ -47,7 +47,7 @@ function Configuracion({ modo, onCambiarModo }: Props) {
   const [medido, setMedido] = useState("");
   useEffect(() => {
     function medir() {
-      setMedido(`zoom ${document.documentElement.style.zoom || "—"} → ${getComputedStyle(document.documentElement).fontSize}`);
+      setMedido(`${getComputedStyle(document.documentElement).fontSize}`);
       setZoom(leerPreferencias().textoPantalla);
     }
     medir();
@@ -164,7 +164,7 @@ function Configuracion({ modo, onCambiarModo }: Props) {
           </div>
           <Selector
             valor={Math.round(zoom * 100)}
-            onChange={(v) => fijarZoom(v / 100)}
+            onChange={(v) => void fijarZoom(v / 100)}
             opciones={[100, 125, 150, 175, 200].map((n) => ({ v: n, l: `${n} %` }))}
           />
         </div>
