@@ -152,7 +152,7 @@ function Configuracion({ modo, onCambiarModo }: Props) {
             valor={Math.round(zoom * 100)}
             onChange={(v) => {
               setZoom(v / 100);
-              void fijarZoom(v / 100);
+              fijarZoom(v / 100);
             }}
             opciones={[100, 125, 150, 175, 200].map((n) => ({ v: n, l: `${n} %` }))}
           />

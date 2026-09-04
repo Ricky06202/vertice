@@ -1,21 +1,17 @@
 import { leerPreferencias, guardarPreferencias } from "./preferencias";
 
 /**
- * Zoom de la interfaz (independiente del escalado del compositor):
- * en pantallas 4K sin escala HiDPI bien propagada, el texto sale a media
- * altura; este ajuste multiplica todo el tamaño de la UI y se recuerda.
+ * Tamaño de interfaz: escala la base del `rem` (html font-size = 18px × factor).
+ * Todo Tailwind (texto, padding, alturas) es rem, así que la UI completa crece.
+ * No depende de permisos Tauri ni del escalado del compositor: vale en 4K sin HiDPI,
+ * con webview y hasta en navegador.
  */
-export async function aplicarZoom(): Promise<void> {
-  if (!("__TAURI_INTERNALS__" in window)) return; // en navegador: zoom propio del browser
-  try {
-    const { getCurrentWebview } = await import("@tauri-apps/api/webview");
-    await getCurrentWebview().setZoom(leerPreferencias().textoPantalla);
-  } catch {
-    /* permisos/versión sin soporte de zoom: la UI sigue usable con el tamaño base */
-  }
+export function aplicarZoom(): void {
+  const factor = leerPreferencias().textoPantalla;
+  document.documentElement.style.setProperty("--vertice-zoom", String(factor));
 }
 
-export async function fijarZoom(factor: number): Promise<void> {
+export function fijarZoom(factor: number): void {
   guardarPreferencias({ textoPantalla: factor });
-  await aplicarZoom();
+  aplicarZoom();
 }

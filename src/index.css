@@ -18,9 +18,10 @@
 }
 
 @layer base {
-  /* Texto grande por defecto: 1 rem = 18px → text-base ≈ 18px, text-lg ≈ 20px */
+  /* Texto grande por defecto: base 18px, multiplicada por el zoom de pantalla
+     (--vertice-zoom, ajustable en Configuración → "Tamaño de pantalla"). */
   html {
-    font-size: 18px;
+    font-size: calc(18px * var(--vertice-zoom, 1));
   }
 
   body {
