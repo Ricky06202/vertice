@@ -9,9 +9,11 @@ fn main() {
     // y, si hay compositor Wayland, backend nativo (wl_output.scale sí es fiable).
     #[cfg(target_os = "linux")]
     {
-        if std::env::var_os("GDK_BACKEND").is_none() && std::env::var_os("WAYLAND_DISPLAY").is_some() {
-            std::env::set_var("GDK_BACKEND", "wayland");
-        }
+        // IMPORTANTE: no forzar GDK_BACKEND=wayland. Sobre Hyprland, la salida
+        // Wayland no reporta tamaño físico y WebKitGTK 2.52 calcula un DPI
+        // negativo (dpr = -1/96) que deja la vista insensible a zoom/font-size.
+        // Con DISPLAY presente, GTK usa X11/XWayland, donde si hay Xft.dpi o
+        // xsettingsd el dpr es el correcto.
         let actuales = std::env::var("GTK_SETTINGS").unwrap_or_default();
         if !actuales.contains("xft-dpi") {
             let nuevo = if actuales.is_empty() {

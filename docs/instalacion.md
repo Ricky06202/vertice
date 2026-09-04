@@ -131,4 +131,5 @@ frontend), `bun test`.
 | "No se puede leer el archivo" al abrir | Si existe el `.bak`, Vértice ofrece recuperarlo; cómpartalo (borrando datos sensibles) reportando un Issue con el archivo dañado |
 | Se pierde el trabajo tras un corte | Reabra `nombre.vertice` (autoguardado cada pocos segundos); si eso falla, abra `nombre.vertice.bak` y renómbralo |
 | En NixOS `bun run tauri dev` falla al buscar librerías | Ejecute siempre dentro de `nix develop .#vertice`, no en el shell del sistema |
+| Interfaz diminuta e insensible al zoom (WebKit sobre Hyprland) | El compositor Hyprland no anuncia tamaño físico ni publica DPI: WebKitGTK calcula devicePixelRatio negativo. Solución para apps GTK/XWayland (todas, no solo Vértice): publicar DPI— `exec-once = xrdb -merge ~/.Xresources` en Hyprland con `Xft.dpi: 96` en `.Xresources`, o habilitar un proveedor de XSettings (xsettingsd / portal). Vértice ya fuerza `gtk-xft-dpi=96` para GTK y ofrece "Restablecer zoom" |
 | El diálogo Abrir/Guardar no aparece | Son diálogos nativos: si acaba de instalar, reinicie el entorno de escritorio; no se muestra con `bun run dev` en navegador (normal) |

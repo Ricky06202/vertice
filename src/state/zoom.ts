@@ -33,8 +33,8 @@ export async function aplicarZoom(): Promise<void> {
   if (esTauri()) {
     try {
       const { getCurrentWebview } = await import("@tauri-apps/api/webview");
-      await getCurrentWebview().setZoom(Math.log2(factor));
-      ultimoMetodo = "nativo(log2)";
+      await getCurrentWebview().setZoom(factor);
+      ultimoMetodo = "nativo";
       return finish(factor);
     } catch (e) {
       ultimoError = String(e);
@@ -60,13 +60,13 @@ export async function fijarZoom(factor: number): Promise<void> {
   await aplicarZoom();
 }
 
-/** Emergencia: nivel 0 (factor 1 exacto) limpia cualquier zoom de página heredado. */
+/** Emergencia: factor 1 limpio por si queda zoom de página heredado. */
 export async function restablecerZoom(): Promise<void> {
   guardarPreferencias({ textoPantalla: 1 });
   if (esTauri()) {
     try {
       const { getCurrentWebview } = await import("@tauri-apps/api/webview");
-      await getCurrentWebview().setZoom(0);
+      await getCurrentWebview().setZoom(1);
     } catch {
       /* nada más que hacer */
     }
