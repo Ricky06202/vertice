@@ -165,8 +165,10 @@ function Configuracion({ modo, onCambiarModo }: Props) {
           <Selector
             valor={Math.round(zoom * 100)}
             onChange={(v) => {
-              setZoom(v / 100);
+              // WebKitGTK no re-resuelve `rem` en caliente: recargar aplica el
+              // tamaño nuevo desde el primer fotograma (parpadeo <1 s).
               fijarZoom(v / 100);
+              window.location.reload();
             }}
             opciones={[100, 125, 150, 175, 200].map((n) => ({ v: n, l: `${n} %` }))}
           />
@@ -174,18 +176,21 @@ function Configuracion({ modo, onCambiarModo }: Props) {
         <p className="text-base text-ink-soft" role="status">
           Preferido: <strong className="text-accent-strong">{Math.round(zoom * 100)} %</strong>
           {" · "}tamaño real del documento: <strong className="font-mono">{medido || "…"}</strong>
-          {" · "}Ctrl + “+”/“−” también cambia el tamaño.
+          {" · "}Al elegir un tamaño, Vértice se recarga solo para aplicarlo.
           <button
             type="button"
             className="ml-2 cursor-pointer rounded-lg border border-line bg-surface px-3 py-1 text-base font-semibold text-red-700 hover:bg-red-50"
-            onClick={() => void restablecerZoom()}
+            onClick={() => {
+              void restablecerZoom();
+              window.location.reload();
+            }}
           >
             Restablecer zoom
           </button>
         </p>
-        <p className="text-base text-ink-soft" role="status">
-          Ajustes como decimales o descripción viajan dentro del archivo del proyecto; el tamaño de pantalla y el modo (se aplica a este job); el
-          modo por defecto queda guardado en este equipo.
+        <p className="text-base text-ink-soft">
+          Los ajustes de números y descripción viajan dentro del archivo del proyecto;
+          el tamaño de pantalla y el modo quedan guardados en este equipo.
         </p>
       </section>
     </div>
