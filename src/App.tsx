@@ -6,6 +6,7 @@ import Placeholder from "./components/Placeholder";
 import Inicio from "./components/Inicio";
 import Puntos from "./components/Puntos";
 import Calculo from "./components/Calculo";
+import Informes from "./components/Informes";
 import { JobsProvider } from "./state/JobsContext";
 
 export type Modo = "simple" | "avanzado";
@@ -23,12 +24,7 @@ const TABS = [
 
 export type TabId = (typeof TABS)[number]["id"];
 
-const PLACEHOLDERS: Record<Exclude<TabId, "inicio" | "puntos" | "calculo">, { titulo: string; texto: string; glyph: string }> = {
-  informes: {
-    titulo: "Informes",
-    texto: "Listado de coordenadas, informe de texto y opciones de impresión.",
-    glyph: "☰",
-  },
+const PLACEHOLDERS: Record<Exclude<TabId, "inicio" | "puntos" | "calculo" | "informes">, { titulo: string; texto: string; glyph: string }> = {
   configuracion: {
     titulo: "Configuración",
     texto: "Decimales, separador decimal, aspecto y preferencias de guardado.",
@@ -84,15 +80,18 @@ function App() {
   return (
     <JobsProvider>
       <div className="flex h-screen flex-col">
-        <Header
-          modo={modo}
-          onCambiarModo={cambiarModo}
-          onAbrirRegistro={() => setRegistroAbierto(true)}
-        />
+        {/* Al imprimir un informe, el marco de la app desaparece de la página */}
+        <div className={`contents ${tab === "informes" ? "print:hidden" : ""}`}>
+          <Header
+            modo={modo}
+            onCambiarModo={cambiarModo}
+            onAbrirRegistro={() => setRegistroAbierto(true)}
+          />
 
-        <TabBar tabs={TABS} modo={modo} actual={tab} onSeleccionar={setTab} />
+          <TabBar tabs={TABS} modo={modo} actual={tab} onSeleccionar={setTab} />
+        </div>
 
-        <main className="flex-1 overflow-y-auto p-6 lg:p-10">
+        <main className="flex-1 overflow-y-auto p-6 lg:p-10 print:overflow-visible print:p-0">
           <div className="mx-auto max-w-5xl">
             {tab === "inicio" ? (
               <Inicio />
@@ -100,6 +99,8 @@ function App() {
               <Puntos />
             ) : tab === "calculo" ? (
               <Calculo modo={modo} />
+            ) : tab === "informes" ? (
+              <Informes />
             ) : (
               <Placeholder
                 {...PLACEHOLDERS[tab]}

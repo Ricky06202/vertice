@@ -78,7 +78,7 @@ function LogPanel({ abierto, onCerrar }: Props) {
 
   return (
     <div
-      className="fixed inset-0 z-40 flex justify-end bg-ink/30"
+      className="fixed inset-0 z-40 flex justify-end bg-ink/30 print:hidden"
       role="dialog"
       aria-modal="true"
       aria-label="Registro"

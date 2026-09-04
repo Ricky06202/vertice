@@ -52,3 +52,16 @@
     @apply border border-line bg-surface text-ink hover:bg-accent-soft;
   }
 }
+
+/* Impresión nativa (pestana Informes usa window.print) */
+@media print {
+  @page {
+    margin: 14mm;
+  }
+  html {
+    font-size: 14px; /* el papel no necesita el tamaño grande de pantalla */
+  }
+  body {
+    background: #ffffff;
+  }
+}
