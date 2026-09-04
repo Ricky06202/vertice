@@ -3,6 +3,8 @@ import Header from "./components/Header";
 import TabBar from "./components/TabBar";
 import LogPanel from "./components/LogPanel";
 import Placeholder from "./components/Placeholder";
+import Inicio from "./components/Inicio";
+import { JobsProvider } from "./state/JobsContext";
 
 export type Modo = "simple" | "avanzado";
 
@@ -19,12 +21,7 @@ const TABS = [
 
 export type TabId = (typeof TABS)[number]["id"];
 
-const PLACEHOLDERS: Record<TabId, { titulo: string; texto: string; glyph: string }> = {
-  inicio: {
-    titulo: "Inicio",
-    texto: "Pronto verás aquí tus trabajos recientes, el punto actual y accesos rápidos.",
-    glyph: "△",
-  },
+const PLACEHOLDERS: Record<Exclude<TabId, "inicio">, { titulo: string; texto: string; glyph: string }> = {
   puntos: {
     titulo: "Puntos",
     texto: "La lista de puntos con número, descripción, Norte, Este y elevación.",
@@ -93,24 +90,32 @@ function App() {
   }
 
   return (
-    <div className="flex h-screen flex-col">
-      <Header
-        jobTitle="Sin proyecto"
-        modo={modo}
-        onCambiarModo={cambiarModo}
-        onAbrirRegistro={() => setRegistroAbierto(true)}
-      />
+    <JobsProvider>
+      <div className="flex h-screen flex-col">
+        <Header
+          modo={modo}
+          onCambiarModo={cambiarModo}
+          onAbrirRegistro={() => setRegistroAbierto(true)}
+        />
 
-      <TabBar tabs={TABS} modo={modo} actual={tab} onSeleccionar={setTab} />
+        <TabBar tabs={TABS} modo={modo} actual={tab} onSeleccionar={setTab} />
 
-      <main className="flex-1 overflow-y-auto p-6 lg:p-10">
-        <div className="mx-auto max-w-5xl">
-          <Placeholder {...PLACEHOLDERS[tab]} fase2={TABS.find((t) => t.id === tab)?.fase2 ?? false} />
-        </div>
-      </main>
+        <main className="flex-1 overflow-y-auto p-6 lg:p-10">
+          <div className="mx-auto max-w-5xl">
+            {tab === "inicio" ? (
+              <Inicio />
+            ) : (
+              <Placeholder
+                {...PLACEHOLDERS[tab]}
+                fase2={TABS.find((t) => t.id === tab)?.fase2 ?? false}
+              />
+            )}
+          </div>
+        </main>
 
-      <LogPanel abierto={registroAbierto} onCerrar={() => setRegistroAbierto(false)} />
-    </div>
+        <LogPanel abierto={registroAbierto} onCerrar={() => setRegistroAbierto(false)} />
+      </div>
+    </JobsProvider>
   );
 }
 
