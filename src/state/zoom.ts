@@ -1,20 +1,21 @@
 import { leerPreferencias, guardarPreferencias } from "./preferencias";
 
 /**
- * Tamaño de interfaz: fija inline el tamaño de fuente raíz (18px × factor).
- * Es la vía más bruta y fiable: no depende de permisos Tauri, de `calc(var())`
- * en el CSS compilado, ni del escalado HiDPI del compositor. Todo el resto de
- * la UI es rem (Tailwind), así que escala completo.
+ * Tamaño de interfaz vía CSS `zoom` (la misma mecánica que el Ctrl++ del
+ * navegador): WebKitGTK la re-resuelve EN CALIENTE, a diferencia del
+ * font-size root con rem (bug propio de wry#3276, sin respuesta upstream).
+ * Escala TODO: rem, px, bordes, sombras, diálogos internos.
  */
-const BASE_PX = 18;
-
 export function aplicarZoom(): void {
   let factor = leerPreferencias().textoPantalla;
   if (typeof factor !== "number" || !Number.isFinite(factor)) factor = 1;
   factor = Math.min(2.5, Math.max(0.75, factor));
-  const root = document.documentElement;
-  root.style.removeProperty("--vertice-zoom");
-  root.style.fontSize = `${BASE_PX * factor}px`;
+  document.documentElement.style.removeProperty("--vertice-zoom");
+  document.documentElement.style.removeProperty("font-size");
+  const zoomStr = String(factor);
+  document.documentElement.style.zoom = zoomStr;
+  // por si algún motor anida raro: body también
+  document.body.style.zoom = document.body.style.zoom || "1";
   window.dispatchEvent(new Event("vertice-zoom"));
 }
 

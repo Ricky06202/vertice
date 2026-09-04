@@ -59,7 +59,6 @@ function App() {
       e.preventDefault();
       const t = Math.min(2.5, Math.max(0.75, leerPreferencias().textoPantalla + paso));
       fijarZoom(t);
-      window.location.reload();
     }
     window.addEventListener("keydown", alPulsar);
     return () => window.removeEventListener("keydown", alPulsar);

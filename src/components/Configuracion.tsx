@@ -47,7 +47,7 @@ function Configuracion({ modo, onCambiarModo }: Props) {
   const [medido, setMedido] = useState("");
   useEffect(() => {
     function medir() {
-      setMedido(`inline ${document.documentElement.style.fontSize || "—"} → ${getComputedStyle(document.documentElement).fontSize}`);
+      setMedido(`zoom ${document.documentElement.style.zoom || "—"} → ${getComputedStyle(document.documentElement).fontSize}`);
       setZoom(leerPreferencias().textoPantalla);
     }
     medir();
@@ -164,26 +164,18 @@ function Configuracion({ modo, onCambiarModo }: Props) {
           </div>
           <Selector
             valor={Math.round(zoom * 100)}
-            onChange={(v) => {
-              // WebKitGTK no re-resuelve `rem` en caliente: recargar aplica el
-              // tamaño nuevo desde el primer fotograma (parpadeo <1 s).
-              fijarZoom(v / 100);
-              window.location.reload();
-            }}
+            onChange={(v) => fijarZoom(v / 100)}
             opciones={[100, 125, 150, 175, 200].map((n) => ({ v: n, l: `${n} %` }))}
           />
         </div>
         <p className="text-base text-ink-soft" role="status">
           Preferido: <strong className="text-accent-strong">{Math.round(zoom * 100)} %</strong>
           {" · "}tamaño real del documento: <strong className="font-mono">{medido || "…"}</strong>
-          {" · "}Al elegir un tamaño, Vértice se recarga solo para aplicarlo.
+          {" · "}Se aplica al instante; si no se viera, pulsa F5 una vez.
           <button
             type="button"
             className="ml-2 cursor-pointer rounded-lg border border-line bg-surface px-3 py-1 text-base font-semibold text-red-700 hover:bg-red-50"
-            onClick={() => {
-              void restablecerZoom();
-              window.location.reload();
-            }}
+            onClick={() => void restablecerZoom()}
           >
             Restablecer zoom
           </button>
