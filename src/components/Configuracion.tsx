@@ -1,5 +1,5 @@
 import { useJobs } from "../state/JobsContext";
-import { fijarZoom, restablecerZoom } from "../state/zoom";
+import { fijarZoom, getDiagZoom, restablecerZoom } from "../state/zoom";
 import { leerPreferencias } from "../state/preferencias";
 import { useEffect, useState } from "react";
 import type { Modo } from "../App";
@@ -172,6 +172,7 @@ function Configuracion({ modo, onCambiarModo }: Props) {
           Preferido: <strong className="text-accent-strong">{Math.round(zoom * 100)} %</strong>
           {" · "}tamaño real del documento: <strong className="font-mono">{medido || "…"}</strong>
           {" · "}Se aplica al instante; si no se viera, pulsa F5 una vez.
+          {" · "}[diag: {getDiagZoom().metodo}{getDiagZoom().error ? ` · ERR ${getDiagZoom().error}` : ""} · dpr {window.devicePixelRatio} · screen {window.screen.width}×{window.screen.height}]
           <button
             type="button"
             className="ml-2 cursor-pointer rounded-lg border border-line bg-surface px-3 py-1 text-base font-semibold text-red-700 hover:bg-red-50"

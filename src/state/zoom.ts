@@ -13,6 +13,13 @@ import { leerPreferencias, guardarPreferencias } from "./preferencias";
  */
 const esTauri = (): boolean => "__TAURI_INTERNALS__" in window;
 
+let ultimoError = "";
+let ultimoMetodo = "—";
+/** Diagnóstico visible desde la UI. */
+export function getDiagZoom(): { metodo: string; error: string } {
+  return { metodo: ultimoMetodo, error: ultimoError };
+}
+
 function factorSeguro(): number {
   let f = leerPreferencias().textoPantalla;
   if (typeof f !== "number" || !Number.isFinite(f)) f = 1;
@@ -22,17 +29,29 @@ function factorSeguro(): number {
 /** La semántica de nivel-log2 aplica a WebKitGTK; en WebView2 se puede mandar directo, pero log2 también vale porque el comando nativo tauri normaliza en Windows. */
 export async function aplicarZoom(): Promise<void> {
   const factor = factorSeguro();
+  ultimoError = "";
   if (esTauri()) {
     try {
       const { getCurrentWebview } = await import("@tauri-apps/api/webview");
       await getCurrentWebview().setZoom(Math.log2(factor));
-    } catch {
-      /* sin permiso/comando: caemos al fallback CSS */
-      document.documentElement.style.zoom = String(factor);
+      ultimoMetodo = "nativo(log2)";
+      return finish(factor);
+    } catch (e) {
+      ultimoError = String(e);
     }
-  } else {
-    document.documentElement.style.zoom = String(factor); // navegador (bun run dev)
   }
+  try {
+    document.documentElement.style.setProperty("zoom", String(factor)) ;
+    ultimoMetodo = "css zoom";
+  } catch (e) {
+    ultimoError = String(e);
+  }
+  finish(factor);
+  finish(factor);
+}
+
+function finish(factor: number) {
+  void factor;
   window.dispatchEvent(new Event("vertice-zoom"));
 }
 
