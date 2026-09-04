@@ -1,6 +1,8 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useJobs } from "../state/JobsContext";
 import type { Punto } from "../types";
+import { analizarCsv, type ResumenImportacion } from "../storage/importarCsv";
+import ImportarResult from "./ImportarResult";
 
 type Formulario = {
   numero: string;
@@ -51,6 +53,22 @@ function Puntos() {
   const [errores, setErrores] = useState<Partial<Record<keyof Formulario, string>>>({});
   const [confirmLimpiar, setConfirmLimpiar] = useState(false);
   const [reanudarDesde, setReanudarDesde] = useState("");
+  const inputArchivo = useRef<HTMLInputElement>(null);
+  const [resumen, setResumen] = useState<ResumenImportacion | null>(null);
+
+  async function alElegirArchivo(e: React.ChangeEvent<HTMLInputElement>) {
+    const archivo = e.target.files?.[0];
+    e.target.value = ""; // permite re-importar el mismo archivo
+    if (!archivo) return;
+    const texto = await archivo.text();
+    setResumen(analizarCsv(texto, new Set(puntos.map((p) => p.numero))));
+  }
+
+  function aplicarImportacion() {
+    if (!resumen) return;
+    escribirProyecto([...puntos, ...resumen.importados]);
+    setResumen(null);
+  }
 
   const visibles = useMemo(() => {
     let l = puntos;
@@ -216,6 +234,22 @@ function Puntos() {
               Mostrar todos
             </button>
           )}
+          <div className="flex items-end">
+            <input
+              ref={inputArchivo}
+              type="file"
+              accept=".csv,.txt,.ace,text/csv,text/plain"
+              className="hidden"
+              onChange={(e) => void alElegirArchivo(e)}
+            />
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => inputArchivo.current?.click()}
+            >
+              Importar CSV
+            </button>
+          </div>
         </div>
         <p className="w-full text-base text-ink-soft" role="status">
           {puntos.length} punto{puntos.length === 1 ? "" : "s"} en el proyecto
@@ -341,6 +375,14 @@ function Puntos() {
           </section>
         </div>
       </div>
+
+      {resumen && (
+        <ImportarResult
+          resumen={resumen}
+          onAplicar={aplicarImportacion}
+          onCancelar={() => setResumen(null)}
+        />
+      )}
     </div>
   );
 }
